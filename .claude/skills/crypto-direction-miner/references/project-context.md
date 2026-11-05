@@ -10,4 +10,16 @@
 - Phase-2 directions the instructor already hinted at: side-channel attacks on our own implementation.
 
 ## Current state
-- No direction chosen yet. Update this section after each mining round.
+- Round 1 done 2026-11-05: `research/direction-mining-2026-11-05.md`. 14 papers read (`research/papers/`),
+  6 candidates collision-checked (`research/collision-cand*.md`). All 6 came back Partial overlap.
+- Top 3 by score, no direction committed yet:
+  - **D3 (recommended)** — HE-friendly cipher *client* cost + transciphering-vs-direct-HE crossover on
+    Cortex-M33. Collision: Open as far as searched; cleanest + most feasible; strong SCA DRP.
+  - **D2** — on-device cost of defeating gradient-*inversion* reconstruction on low-dim sensor FL.
+    Partial overlap (distinct from membership-inference MDPI 10.3390/make8100320).
+  - **D1** — compute-vs-radio energy split of PQ EDHOC/DTLS on M33/Thread + compact-KEM crossover.
+    Partial overlap; "radio dominates" already published (arXiv 2602.18708, 2610.13026) so novelty capped.
+- Dropped: D5 firmware signatures (stack crossover already done, ePrint 2026/635). Deprioritised: D4 PQ
+  secure-agg MCU cost (feasibility), D6 small-N SA leakage (pre-empted by Elkordy PoPETs 2023).
+- Carry-forward before publishing: read the 403-blocked full texts listed in the report's §5.3; VERIFY all
+  EFR32xG24 datasheet electrical numbers before any energy estimate.
