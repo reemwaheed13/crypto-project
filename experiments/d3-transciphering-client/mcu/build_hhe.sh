@@ -11,7 +11,7 @@ cp -r "$H/ciphers/$C" "$W/ciphers/"; cp -r "$H/ciphers/common" "$H/ciphers/commo
 cp "$HERE/harness/stubs/common/kats.h" "$W/ciphers/common/kats.h"
 cp "$HERE/harness/stubs/common_Zp/kats.h" "$W/ciphers/common_Zp/kats.h"
 INC="-I$W/ciphers/$C/plain -I$H/util/keccak -I$H/util/keccak/opt64 -I$H/util/aes -I$HERE/harness ${EXTRA_INC:-}"
-CF="$ARCH $OPT $INC ${EXTRA_DEF:-}"
+CF="$ARCH $OPT -include $HERE/harness/port.h $INC ${EXTRA_DEF:-}"
 cipher_objs=()
 for f in "$W/ciphers/$C/plain/"*.cpp; do
   o=$W/obj/$(basename "$f").o; $CXX $CF -std=gnu++17 -c "$f" -o "$o"; cipher_objs+=("$o"); done

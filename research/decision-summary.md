@@ -30,7 +30,7 @@ modelling choice. "Open" always means *open as far as searched*, never proven op
 | **Collision verdict** | Partial overlap (was "Open" before reading the full texts) | Partial overlap | Partial overlap (the flagged risk paper app16083705 has no batching at all) |
 | **Updated score / 30** | **27** (was 28): novelty 3, threat model 4, falsifiable 5, feasible 5, DRP 5, split 5 | **26** (was 27): novelty 3, threat model 5, falsifiable 5, feasible 4, DRP 4, split 5 | **25** (was 26): novelty 4, threat model 4, falsifiable 5, feasible 4, DRP 3, split 5 |
 | **Biggest remaining risk** | The chip ranking may simply copy the server ranking, because the same reference code has the same bottleneck (random-number generation). Then only the radio crossover is left. | The noise step may turn out to be almost free next to training itself. Then the "cost" half of the story is thin, unless the random-number generator or per-example memory turns out to be expensive on the chip. | **Motivation.** CAIBA already stops a hacked ECU without signatures. We must convince a reviewer that signatures are worth it: no trusted extra node on the bus, proof for forensic logs, and keys that last the car's lifetime. |
-| **Kill experiment status** | **Prepared, not run.** The chip-emulation harness is written (`experiments/d3-transciphering-client/mcu/`). It was blocked only because running the downloaded reference cipher code needs your approval. About one day once approved. | Not started. The week-1 plan is now sharper: the old question ("does the attack still work with batches of 4?") is already answered *yes* by TS-Inverse. | Not started. Half a day of spreadsheet arithmetic. Add CAIBA as a comparison column. |
+| **Kill experiment status** | **Run 2026-11-10: failed on both claims.** Cortex-M33 ranking matches the Xeon ranking (Spearman ρ = 0.976, 8 settings). No crossover against Ascon: every HE-friendly cipher costs 1.2× to more than 10⁴× more at every payload size. See `cost-he-friendly-ciphers-2026-11-10.md`. | Not started. The week-1 plan is now sharper: the old question ("does the attack still work with batches of 4?") is already answered *yes* by TS-Inverse. | Not started. Half a day of spreadsheet arithmetic. Add CAIBA as a comparison column. |
 | **DRP path** | **Strongest.** Run the winning cipher on the real EFR32MG24 kit, measure real battery use, then a power side-channel study of the cipher's keystream, an active research topic. | Good. Run the defended training step on the kit and measure real energy. The side-channel follow-up is weaker, because this is a machine-learning privacy study, not a crypto primitive. | **Weakest on our hardware.** The EFR32MG24 has no CAN controller (datasheet), so the bus part stays simulated unless we get a CAN FD board. The signer's side channel does transfer to the kit. |
 
 ## Plain-words explanation of each remaining question
@@ -54,6 +54,11 @@ smallest signatures (Falcon) loses its main advantage (CONJECTURE). A new low-me
 that less certain.
 
 ## Recommendation
+
+> **Update 2026-11-10 (D3 kill experiment run).** Both D3 checks came out flat: same ranking as the Xeon (ρ = 0.976), and
+> no AEAD crossover (the HE-friendly ciphers cost more at every size). D3 is re-scored to **26** (novelty 2). By the rule
+> below, **switch to D2**. One untested salvage for D3 is a *reversed* crossover against direct BFV/CKKS encryption. It
+> needs its own collision check. Details: `cost-he-friendly-ciphers-2026-11-10.md`.
 
 **Run D3's kill experiment first** (about one day once approved). D3 still scores highest, has the best hardware
 continuation on our kit, and its harness is already written. Pick by outcome:

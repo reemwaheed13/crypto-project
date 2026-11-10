@@ -1,0 +1,7 @@
+KAT 0 plain_bits 129 enc_ok 1 dec_ok 1
+WIN kat 0 blocks 1 rep 0 stack 900 heap 25805
+WIN kat 0 blocks 1 rep 1 stack 900 heap 25805
+WIN kat 0 blocks 1 rep 2 stack 900 heap 25805
+WIN kat 0 blocks 4 rep 0 stack 908 heap 26184
+DONE fails 0
+exit=0

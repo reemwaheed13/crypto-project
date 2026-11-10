@@ -1,0 +1,15 @@
+KAT ascon_aead128 ok 1
+WIN bytes 16 rep 0 ct_bytes 32 stack 256 heap 0
+WIN bytes 16 rep 1 ct_bytes 32 stack 256 heap 0
+WIN bytes 16 rep 2 ct_bytes 32 stack 256 heap 0
+WIN bytes 64 rep 0 ct_bytes 80 stack 256 heap 0
+WIN bytes 64 rep 1 ct_bytes 80 stack 256 heap 0
+WIN bytes 64 rep 2 ct_bytes 80 stack 256 heap 0
+WIN bytes 128 rep 0 ct_bytes 144 stack 256 heap 0
+WIN bytes 128 rep 1 ct_bytes 144 stack 256 heap 0
+WIN bytes 128 rep 2 ct_bytes 144 stack 256 heap 0
+WIN bytes 255 rep 0 ct_bytes 271 stack 256 heap 0
+WIN bytes 255 rep 1 ct_bytes 271 stack 256 heap 0
+WIN bytes 255 rep 2 ct_bytes 271 stack 256 heap 0
+DONE fails 0
+exit=0

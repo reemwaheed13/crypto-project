@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+ 473152	   1972	4192328	4667452	 47383c	/mnt/c/Users/user/Desktop/crypto-research-kit/experiments/d3-transciphering-client/mcu/build/pasta2_3/pasta2_3.elf

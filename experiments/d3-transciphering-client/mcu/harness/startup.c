@@ -21,3 +21,5 @@ __attribute__((section(".vectors"), used)) void (*const vectors[16])(void) = {
     Fault_Handler, Fault_Handler, 0, 0, 0, 0, Fault_Handler, Fault_Handler, 0, Fault_Handler, Fault_Handler };
 void _init(void) {}
 void _fini(void) {}
+/* normally from crtbegin.o, which -nostartfiles drops; used by C++ static destructors */
+void *__dso_handle = 0;

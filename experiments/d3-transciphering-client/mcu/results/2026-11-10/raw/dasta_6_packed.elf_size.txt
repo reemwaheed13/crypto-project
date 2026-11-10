@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+ 157956	    116	4194188	4352260	 426904	/mnt/c/Users/user/Desktop/crypto-research-kit/experiments/d3-transciphering-client/mcu/build/dasta_6_packed/dasta_6_packed.elf

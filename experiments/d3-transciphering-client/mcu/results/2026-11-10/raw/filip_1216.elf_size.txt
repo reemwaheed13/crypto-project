@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+  37340	    128	4194176	4231644	 4091dc	/mnt/c/Users/user/Desktop/crypto-research-kit/experiments/d3-transciphering-client/mcu/build/filip_1216/filip_1216.elf

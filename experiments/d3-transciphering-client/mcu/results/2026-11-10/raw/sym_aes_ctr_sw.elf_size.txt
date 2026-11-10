@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+  11840	    104	4194200	4206144	 402e40	/mnt/c/Users/user/Desktop/crypto-research-kit/experiments/d3-transciphering-client/mcu/build/sym/aes_ctr_sw/aes_ctr_sw.elf

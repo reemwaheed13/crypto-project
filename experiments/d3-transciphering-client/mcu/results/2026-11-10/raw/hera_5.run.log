@@ -1,0 +1,9 @@
+KAT 0 modulus 65537 bits 17 t 16 enc_ok 1 dec_ok 1
+WIN kat 0 blocks 1 rep 0 stack 1072 heap 4416
+WIN kat 0 blocks 1 rep 1 stack 1072 heap 4416
+WIN kat 0 blocks 1 rep 2 stack 1072 heap 4416
+WIN kat 0 blocks 4 rep 0 stack 1072 heap 4800
+SKIP kat 1 modulus_bits 33 (>= 2^32, unsupported by port shim)
+SKIP kat 2 modulus_bits 60 (>= 2^32, unsupported by port shim)
+DONE fails 0
+exit=0

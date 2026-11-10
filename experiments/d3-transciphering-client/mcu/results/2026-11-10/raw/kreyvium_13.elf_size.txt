@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+  29240	    116	4194188	4223544	 407238	/mnt/c/Users/user/Desktop/crypto-research-kit/experiments/d3-transciphering-client/mcu/build/kreyvium_13/kreyvium_13.elf

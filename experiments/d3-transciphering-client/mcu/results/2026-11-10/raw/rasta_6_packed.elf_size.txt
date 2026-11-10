@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+  43396	    116	4194188	4237700	 40a984	/mnt/c/Users/user/Desktop/crypto-research-kit/experiments/d3-transciphering-client/mcu/build/rasta_6_packed/rasta_6_packed.elf

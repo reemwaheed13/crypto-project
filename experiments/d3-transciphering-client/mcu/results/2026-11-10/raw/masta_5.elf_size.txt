@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+ 182452	    116	4194184	4376752	 42c8b0	/mnt/c/Users/user/Desktop/crypto-research-kit/experiments/d3-transciphering-client/mcu/build/masta_5/masta_5.elf

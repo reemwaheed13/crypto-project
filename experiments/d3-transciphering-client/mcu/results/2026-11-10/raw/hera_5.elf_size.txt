@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+ 190768	    116	4194184	4385068	 42e92c	/mnt/c/Users/user/Desktop/crypto-research-kit/experiments/d3-transciphering-client/mcu/build/hera_5/hera_5.elf

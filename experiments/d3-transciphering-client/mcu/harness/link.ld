@@ -13,6 +13,6 @@ SECTIONS {
   .data : { __data_start = .; *(.data*) . = ALIGN(4); __data_end = .; } > RAM AT > CODE
   __data_load = LOADADDR(.data);
   .bss (NOLOAD) : { __bss_start = .; *(.bss*) *(COMMON) . = ALIGN(8); __bss_end = .; } > RAM
-  .heap (NOLOAD) : { __heap_start = .; . = ORIGIN(RAM) + LENGTH(RAM) - _stack_size; __heap_end = .; } > RAM
+  .heap (NOLOAD) : { __heap_start = .; end = .; . = ORIGIN(RAM) + LENGTH(RAM) - _stack_size; __heap_end = .; } > RAM
   .stack (NOLOAD) : { __stack_limit = .; . += _stack_size; __stack_top = .; } > RAM
 }

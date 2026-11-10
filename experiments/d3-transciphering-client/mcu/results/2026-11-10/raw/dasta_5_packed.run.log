@@ -1,0 +1,5 @@
+KAT 0 plain_bits 525 enc_ok 1 dec_ok 1
+WIN kat 0 blocks 1 rep 0 stack 42964 heap 1692349
+WIN kat 0 blocks 1 rep 1 stack 42964 heap 1692349
+WIN kat 0 blocks 1 rep 2 stack 42964 heap 1692349
+exit=1

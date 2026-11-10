@@ -183,7 +183,13 @@ see `papers/hhe-kombat.md`. PETCHA (ePrint 2026/112) was searched for client or 
 - **Biggest remaining risk:** the M33 ranking may simply match the Xeon ranking (same reference code, same
   PRNG-dominated cost structure). Then (a′) is dead and D3 rests on the crossover (b) alone.
 
-**Scores (1–5), after full-text check (2026-11-10):** novelty **3** (client ranking now KNOWN on a Xeon; only the MCU
+**Kill experiment result (2026-11-10): FAILED.** (a′) M33 client ranking = Xeon client ranking (Spearman ρ = 0.976 over
+8 shared settings; one adjacent swap, not robust). The ranking holds even if all software 64-bit division is removed.
+(b) No crossover against Ascon-AEAD128: every HE-friendly cipher costs more at every payload from 16 to 1024 B (Kreyvium
+1.2–2×, HERA-5 1.7–4×, Pasta-4 8–27×, FiLIP more than 10³×). Dasta-6 and Rasta-5 also exceed 256 kB RAM. Novelty → 2,
+total → **26**. Full report: `cost-he-friendly-ciphers-2026-11-10.md`.
+
+**Scores (1–5), after full-text check (2026-11-10, superseded by the kill result above):** novelty **3** (client ranking now KNOWN on a Xeon; only the MCU
 ranking and the radio crossover remain), threat-model clarity **4**, falsifiability **5**, feasibility **5**, DRP
 continuity **5**, group split **5**. **Total 27** (was 28). Re-score once the kill experiment has run.
 

@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+  41960	    116	4194188	4236264	 40a3e8	/mnt/c/Users/user/Desktop/crypto-research-kit/experiments/d3-transciphering-client/mcu/build/agrasta_packed/agrasta_packed.elf

@@ -2,7 +2,7 @@
 CC=arm-none-eabi-gcc; CXX=arm-none-eabi-g++
 ARCH="-mcpu=cortex-m33 -mthumb -mfloat-abi=hard -mfpu=fpv5-sp-d16"
 OPT="-O3 -ffunction-sections -fdata-sections -fstack-usage"
-LDFLAGS="-T $HERE/harness/link.ld -nostartfiles --specs=nano.specs --specs=rdimon.specs -Wl,--gc-sections \
+LDFLAGS="-T $HERE/harness/link.ld -nostartfiles ${LIBC_SPECS:---specs=nano.specs} --specs=rdimon.specs -Wl,--gc-sections \
  -Wl,--wrap=malloc,--wrap=free,--wrap=calloc,--wrap=realloc"
 
 # run_elf <elf> <outprefix>: run under QEMU mps2-an505 (Cortex-M33) with the instruction-window plugin.
@@ -16,8 +16,9 @@ run_elf() {
   local st sp
   st=$(arm-none-eabi-nm "$elf" | awk '$3=="bench_start"{print $1}')
   sp=$(arm-none-eabi-nm "$elf" | awk '$3=="bench_stop"{print $1}')
-  timeout 3000 qemu-system-arm -M mps2-an505 -cpu cortex-m33 -nographic -monitor none -serial none \
+  local rc=0
+  timeout "${QEMU_TIMEOUT:-3000}" qemu-system-arm -M mps2-an505 -cpu cortex-m33 -nographic -monitor none -serial none \
     -semihosting-config enable=on,target=native -kernel "$elf" \
-    -plugin "$PLUGIN,start=$st,stop=$sp,out=$out.insn$ranges" > "$out.log" 2>&1
-  echo "exit=$?" >> "$out.log"
+    -plugin "$PLUGIN,start=$st,stop=$sp,out=$out.insn$ranges" > "$out.log" 2>&1 || rc=$?
+  echo "exit=$rc" >> "$out.log"   # 124 = timeout
 }
