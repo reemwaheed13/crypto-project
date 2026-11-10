@@ -21,5 +21,13 @@
     Partial overlap; "radio dominates" already published (arXiv 2602.18708, 2610.13026) so novelty capped.
 - Dropped: D5 firmware signatures (stack crossover already done, ePrint 2026/635). Deprioritised: D4 PQ
   secure-agg MCU cost (feasibility), D6 small-N SA leakage (pre-empted by Elkordy PoPETs 2023).
+- Round 2 done 2026-11-05 (novelty-focused, two lanes): `research/direction-mining-round2-2026-11-05.md`.
+  10 more papers read; 8 candidates collision-checked (`research/collision-r2-*.md`), all Partial overlap or worse.
+  - Lane A survivors: **A4** amortised PQ source authentication of CAN FD frame streams (total 26, ranks 3rd overall
+    behind D3/D2); **A3** FN-DSA signing at 10 Hz on an M33-class V2X unit (24, best DRP fit).
+  - Lane B survivors (NEED INSTRUCTOR APPROVAL): **B3** MLS/TreeKEM post-compromise recovery vs duty cycle (23);
+    **B4** BBS credentials on M33 with secure-element ECDSA binding (23).
+  - Dropped: A1 CKKS actuator oracle (killed by ePrint 2026/2490), A2 federated-unlearning leakage (minor variant
+    of D2), B1 leveled Ascon (ePrint 2024/755), B2 FROST nonce state (minor variant of LMS state work).
 - Carry-forward before publishing: read the 403-blocked full texts listed in the report's §5.3; VERIFY all
   EFR32xG24 datasheet electrical numbers before any energy estimate.
