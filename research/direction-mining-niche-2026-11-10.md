@@ -95,6 +95,12 @@ CSPRNG, has three problems:
 - ASSUMPTION: instruction-path variation is the dominant timing source on the in-order M33. FP divide/sqrt latencies
   and flash wait states are not modelled.
 
+> **Kill test run 2026-11-11 (`n1-kill-2026-11-11.md`): the headline does NOT transfer to FedAvg.** After summing 5
+> local steps (noise-only sum, and the real 5-step D2 update), the best attack only matches the ideal-Gaussian bound
+> (LR test on the Gaussian-optimal line; the low-bit floating-point test is at chance). The pair-inversion break holds
+> for single-step / per-step releases only (96%, reproduced). N1 re-scored **24** (novelty 2). It is kept inside D2 as
+> hardening plus a phase-2 side-channel target (instruction-path leak), not as a break.
+
 **Kill experiment (week 1).** The single-step pair attack is already done (§4). Week 1 tests whether it survives D2's
 real upload: the update w0 − w5 after 5 local steps, with the lr/B scaling and float32 roundings, and the canary in only
 some steps.

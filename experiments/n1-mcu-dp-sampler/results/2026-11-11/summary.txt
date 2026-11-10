@@ -1,0 +1,15 @@
+## Setting 1: single-step release, exact pair-inversion test
+sigma=0.4509: accuracy 96.2% (true-hypothesis match 2000/2000, false 149/2000); ideal Gaussian bound 86.6%
+sigma=0.7983: accuracy 95.5% (true-hypothesis match 2000/2000, false 179/2000); ideal Gaussian bound 73.4%
+
+## Setting 2: noise-only float32 sum of 5 Box-Muller values
+sigma=0.4509, canary in step 1 only: LR 68.3% | BITS 52.8% | LR+BITS 67.8% | ideal Gaussian bound 69.0% (single-step bound was 86.6%); test n = 10000
+sigma=0.4509, canary in all 5 steps: LR 99.3% | BITS 76.6% | LR+BITS 99.2% | ideal Gaussian bound 99.3% (single-step bound was 86.6%); test n = 10000
+sigma=0.7983, canary in step 1 only: LR 60.6% | BITS 49.8% | LR+BITS 59.3% | ideal Gaussian bound 61.0% (single-step bound was 73.4%); test n = 10000
+sigma=0.7983, canary in all 5 steps: LR 92.0% | BITS 68.2% | LR+BITS 90.7% | ideal Gaussian bound 91.9% (single-step bound was 73.4%); test n = 10000
+
+## Setting 3: real 5-step DP-SGD FedAvg upload U = W5 - W0 (D2 FCN, float32)
+sigma=0.4509, canary in step 1 only: LR 59.6% (n=2000) | BITS 49.5% | LR+BITS 52.6% | ideal Gaussian bound 56.7% (mu = 0.336: ||E[U|1]-E[U|0]|| = 4.226e-02, per-coord noise s.d. 1.259e-01; canary raw grad norm 0.61, clipped to C = 1) (single-step bound was 86.6%)
+sigma=0.4509, canary in all 5 steps: LR 87.6% (n=2000) | BITS 49.2% | LR+BITS 83.1% | ideal Gaussian bound 81.8% (mu = 1.818: ||E[U|1]-E[U|0]|| = 2.288e-01, per-coord noise s.d. 1.259e-01; canary raw grad norm 0.42, clipped to C = 1) (single-step bound was 86.6%)
+sigma=0.7983, canary in step 1 only: LR 56.2% (n=2000) | BITS 53.0% | LR+BITS 52.8% | ideal Gaussian bound 53.8% (mu = 0.190: ||E[U|1]-E[U|0]|| = 4.226e-02, per-coord noise s.d. 2.228e-01; canary raw grad norm 0.61, clipped to C = 1) (single-step bound was 73.4%)
+sigma=0.7983, canary in all 5 steps: LR 73.2% (n=2000) | BITS 53.4% | LR+BITS 62.5% | ideal Gaussian bound 69.6% (mu = 1.027: ||E[U|1]-E[U|0]|| = 2.288e-01, per-coord noise s.d. 2.228e-01; canary raw grad norm 0.42, clipped to C = 1) (single-step bound was 73.4%)

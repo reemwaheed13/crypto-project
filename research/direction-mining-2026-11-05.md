@@ -298,6 +298,17 @@ TS-Inverse (arXiv 2503.20952), the GIA SoK (USENIX Sec 2025) and Deutel et al. (
 
 ---
 
+**Kill experiment result (2026-11-10/11): SURVIVES** (`d2-kill-2026-11-10.md`). On Electricity-370, under 5-step FedAvg
+with B = 4, the learned LTI attacker leaks without DP (sMAPE 0.25 against the prior's 0.45). At ε = 8 the optimisation
+attack is defeated, but LTI is still about 2 SE better than the prior, and accuracy drops 1.3 points. At ε = 1 both
+attacks are defeated, at a cost of 5.4 points. On the M33 the DP step costs 4.85× the plain step, and 66% of that is
+noise. N1 sampler work package (`n1-kill-2026-11-11.md`): the float32 pair-inversion break does **not** carry over to
+this 5-step setting. What stays in D2 is the tail-cap accounting, the instruction-path leak (phase-2 power analysis of
+the noise routine) and the cost of a constant-time sampler. Score **26** (novelty 3, threat model 5, falsifiable 5,
+feasible 5, DRP 4, split 4).
+
+---
+
 ### D1 — Is a post-quantum handshake radio-bound on a Cortex-M33 over Thread, and where is the KEM-size crossover?
 
 **Move used:** Account for the whole system (compute + radio + fragmentation) + find the crossover.
