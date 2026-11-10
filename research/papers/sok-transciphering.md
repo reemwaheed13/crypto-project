@@ -77,3 +77,15 @@ This SoK is directly on-topic for the PQC/FHE strand but has a **server-side bli
 - https://github.com/AntCPLab/awesome-transciphering (companion code; RtF/FV, BtR/CKKS, CGGI/TFHE tracks)
 - https://arxiv.org/html/2510.20243v1 (HHEML — cites SoK's ResNet-20 benchmarking; context only)
 - Benchmark figures (HERA/Rubato throughput, Xeon 2.70 GHz, single-thread) from web-search snippets of the paper — NOT read from primary PDF; re-verify.
+
+## Full-text check (2026-11-10, local PDF `2025-669.pdf`, 32 pages)
+Reading depth is now **full text**. The full text corrects two statements above:
+1. **The SoK does measure client-side cost**, in Table 4 (§5.4, p. 20): latency in CPU cycles and throughput in cycles/byte for 23 cipher settings. The settings include Trivium, Kreyvium, FiLIP-DSM/TX, Margrethe, LowMC, Rasta, Dasta, FRAST, Masta, Pasta, Pastav2, HERA, Rubato and AES-SW (kokke/tiny-AES-c). These are measured on the same Xeon as the server benchmarks, not on an MCU. Lines 43 and 53 above ("client encryption … not independently measured", "does not quantify them") are therefore wrong for a PC client. They hold only for constrained hardware.
+2. **Latency and throughput were swapped** in the snippet figures above. Table 2 (p. 17) gives HERA(5,16,16,28-bit) **latency 1.38×10⁵ ms, throughput 25.95 KB/s**, and Rubato(5,16,12,26-bit) **0.86×10⁵ ms, 28.94 KB/s**.
+
+Client-side ordering in Table 4 (cycles for one block, lower is better):
+- **Cheapest:** AES-SW 1.86×10³; HERA-5 2.86×10⁴; Trivium-12 4.89×10⁴; Kreyvium-13 5.27×10⁴.
+- **Middle:** FRAST 1.47×10⁵; Pastav2-4 1.92×10⁵; Masta-6 2.25×10⁵; Pasta-4 4.70×10⁵ … Dasta-6 7.76×10⁵.
+- **Most expensive:** Rubato-5/3/2 1.22–1.48×10⁷; FiLIP-DSM 2.56×10⁷; Rasta-5 1.81×10⁸; LowMC 1.73×10⁸.
+
+Section 6 observation (2) says outright that Rubato's server-side advantage comes with poor client-side cost, and that "a client with constrained communication resources is often also limited in computational capabilities, such as an IoT device". **Consequence for D3:** "the server-optimal cipher is not the client-optimal one" is KNOWN, on a Xeon. D3's remaining question is whether the client ranking changes between a Xeon and a Cortex-M33 (a 32-bit core with no 64-bit multiply/divide, Keccak-based PRNG cost, a few hundred kB of RAM). Platform detail: the paper names an Intel Xeon but does not state its model in §5. The IAIK framework that several of these ciphers come from builds Keccak with AVX2 by default (its `util/keccak/CMakeLists.txt`). Table 4 note: Pasta-3 is listed as (3,128,64), while Table 2 lists it as (3,256,128). The paper is internally inconsistent here.

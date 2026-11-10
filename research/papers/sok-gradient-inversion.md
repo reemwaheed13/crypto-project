@@ -74,3 +74,6 @@ This SoK is strong supporting evidence for our candidate directions, and importa
 - **Stress-test-an-assumption:** drop the "batch size 1 / known labels / matching surrogate" assumptions and quantify how fast leakage decays for realistic IoT batch/label conditions.
 - **Close-a-named-gap (small N + active server):** find the client-count N at which SA stops hiding a single IoT client against a Threat-Model-F/H server — a number the SoK says is missing.
 - **Defence-reality-check:** test whether a cheap client-side perturbation that survives on an MCU actually blocks a modern (Yue-style) attack, feeding the "client-side defence for F–H" open problem.
+
+## Full-text check (2026-11-10, local PDF `usenixsecurity25-carletti.pdf`, 22 pages)
+The note above was re-checked against the local PDF and stands. The SoK is literature-only, its Table 2 is image-only, and §7 lists "beyond image classification" as an open problem. It gives no cost measurements, so cite it only for taxonomy and open problems.

@@ -76,3 +76,9 @@ This is the natural **seed** for moving gradient-inversion from images to low-di
 
 ## Reading depth
 **Full-read** of the rendered PDF (all 16 pages: abstract, Sec I–VII, Tables I–X, Figs 1–11, references). Hardware/GPU platform is the one item not stated in the text and is flagged as not reported.
+
+## Full-text check (2026-11-10, local PDF `2503.20952v1.pdf`)
+The note above was re-checked against the local PDF and stands. Points that matter for D2's re-scoring:
+1. **B = 4 is already tested.** Figs 9–10 (p. 10) use regularised TS-Inverse at B = 4 and still reconstruct. D2's kill experiment ("does reconstruction already fail at batch > 1?") is therefore partly answered for B = 4 under FedSGD. Multi-step FedAvg is still untested.
+2. **Table IX (p. 11) states no noise scale (σ or ε) for "gauss".** Noise defeats the optimisation attacks (sMAPE about 1.8–2.0), but the **learned LTI attack keeps sMAPE about 0.22/0.23**, and the authors suggest it "could potentially learn the defense characteristics". A defence study must therefore include a learned, defence-aware attacker, not only optimisation attacks.
+3. No device cost, no ε accounting and no secure aggregation, as stated above.

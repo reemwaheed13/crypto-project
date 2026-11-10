@@ -101,3 +101,6 @@ Table II (DSAs, ms, overhead = total minus nominal message time), transcribed fr
 - **Fix the platform model:** replace CPU-share throttling with Cortex-M4 cycle counts (pqm4 numbers or an emulator) calibrated to a real core. That is the step to the EFR32xG24 in phase 2.
 - **Separate one-time from steady-state costs:** keygen and certificate exchange at startup versus per-window cost. PQ-CAN folds Falcon keygen into every run.
 - **Phase 2 side channel:** Falcon signing on the ECU, where floating-point sampling is a known leakage concern, versus hash-based window signing.
+
+## Full-text check (2026-11-10, local PDF `2504.10730v1.pdf`, 6 pages)
+Reading depth is now **full text (PDF)**. Table II (p. 5) was re-checked against the PDF, and every Sign, Verify, Overhead and Success value transcribed above matches. One addition: Table II has a **Key Generation** column, and for Falcon-512 it is 43.0 / 76.4 / 139.9 ms (high/mid/low). That accounts for almost all of Falcon-512's 47.0 / 90.8 / 167.5 ms "overhead", while signing is 0.49–0.61 ms. **Do not cite "Falcon-512 overhead 47–167.5 ms" as a signing or transport cost:** it is mostly key generation repeated in every run. CAN FD, ISO-TP, Merkle and amortisation do not appear anywhere in the PDF. The only "Merkle" mention describes SPHINCS+ itself (p. 2).

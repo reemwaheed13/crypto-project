@@ -12,9 +12,40 @@ PQC / FHE / FL privacy. **Lane B** uses other primitives, and every Lane B card 
 > **Reading-depth warning:** this round, many ePrint, MDPI and TCHES PDFs returned HTTP 403 to the agents, so several
 > neighbours were read as abstracts only. Each card names the full texts that must be read before committing.
 
+## Target device: verified datasheet numbers (added 2026-11-10)
+
+**Part.** The EFR32xG24 Dev Kit (xG24-DK2601B, board BRD2601B) carries the **EFR32MG24B310F1536IM48-B**. Source caveat: the kit user guide (UG524) is *not* in `research/papers/` and its Silicon Labs URL returned HTTP 403. The part number therefore comes from the Zephyr board documentation for xg24_dk2601b, not from the user guide. Confirm it against UG524 (or the chip marking) once the guide is added. If the group's kit is a different board (e.g. a BRD4186C radio board), the row below changes.
+
+**Source.** *EFR32MG24 Wireless SoC Family Data Sheet*, Rev. 1.2 (local `research/papers/efr32mg24-datasheet.pdf`). Page numbers are the datasheet's own page numbers.
+
+| Quantity | Value for EFR32MG24B310F1536IM48-B | Datasheet row |
+|---|---|---|
+| Core | Cortex-M33 with DSP extensions, FPU, TrustZone | §1 Feature List (p. 2); block diagram (p. 1) |
+| Max CPU clock | **78 MHz** (needs VSCALE2 and 1 flash wait state, WS1; with 0 wait states the max is 40 MHz) | Table 4.2 General Operating Conditions, f_HCLK (p. 24) |
+| Flash / RAM | **1536 kB / 256 kB** | Table 2.1 Ordering Information (p. 3) |
+| Max TX power (this OPN) | **10 dBm** (the 19.5 dBm PA is only on the x20 OPNs) | Table 2.1 (p. 3) |
+| Secure Vault level | **High** | Table 2.1 (p. 3); feature list Table 3.1 (p. 13) |
+| Active current, EM0, DC-DC at 3.0 V, 78 MHz (HFRCO + DPLL, VSCALE2) | **33.3 µA/MHz** running Prime from flash; 32.8 µA/MHz while-loop; **49.1 µA/MHz** CoreMark | Table 4.5 (p. 29) |
+| Radio TX current, 2.4 GHz CW, DC-DC 3.0 V, VSCALE2 | **5.2 mA** at 0 dBm (0 dBm PA); **19.2 mA** at 10 dBm (10 dBm PA) | Table 4.6 I_TX (p. 33) |
+| Radio RX current, 802.15.4, DC-DC 3.0 V, VSCALE2 | **5.7 mA** receiving a frame; **5.6 mA** listening | Table 4.6 I_RX_ACTIVE (p. 32), I_RX_LISTEN (p. 33) |
+| 802.15.4 data rate | **250 kbps** O-QPSK DSSS | §1 Feature List (p. 2); 802.15.4 RX table is Table 4.20 (p. 55) |
+| Hardware crypto (SE Manager API) | ECDSA P-256 sign **5.9 ms**, verify **6.2 ms**; AES-128-CTR 1 kB **474 µs**; SHA-256 1 kB **308 µs** | Table 4.53 (p. 92–93) |
+| CAN / CAN FD controller | **none listed** (the word "CAN" as a bus peripheral does not appear in the datasheet) | §3 System Overview peripheral list; full-text search |
+
+**Derived constants. These are arithmetic from the rows above, not datasheet values (ASSUMPTION: 3.0 V supply, DC-DC, VSCALE2, typical values).**
+- Energy per CPU cycle = I/MHz × V = 33.3 µA/MHz × 3.0 V ≈ **0.100 nJ/cycle** (Prime) to **0.147 nJ/cycle** (CoreMark). Use the range, because crypto code sits between the two workloads.
+- Time on air per byte at 250 kbps = **32 µs**. TX energy per byte ≈ 5.2 mA × 3.0 V × 32 µs ≈ **0.50 µJ/B at 0 dBm** and **1.84 µJ/B at 10 dBm**. RX ≈ **0.55 µJ/B**. These exclude preamble/PHY header, MAC header, ACKs, CSMA back-off and radio wake-up, which are protocol-dependent and must be modelled separately.
+- So one transmitted payload byte costs as much energy as roughly **3,400–5,000 CPU cycles at 0 dBm** and **12,500–18,400 cycles at 10 dBm**. This ratio drives every compute-vs-radio crossover in these reports.
+- The TX current rows are continuous-wave measurements, not 802.15.4 packet measurements, and they were taken with the MCU in EM1 at 39 MHz (Table 4.6 header, p. 32). Treat them as radio-only adders. The phase-2 kit measurement replaces them.
+
 ---
 
 ## 1. Bottom line
+
+> **Update 2026-11-10 (full-text checks).** app16083705 does **not** discuss batching, Merkle trees or amortised
+> signatures, so A4's flagged risk is cleared. A new neighbour, CAIBA (EuroS&P 2025), already gives *symmetric* source
+> authentication on CAN, so A4 must argue why signatures are needed. Re-scores: D3 27, D2 26, A4 25; the order is
+> unchanged. Comparison: `decision-summary.md`.
 
 The novelty push produced **four survivors out of eight candidates, all Partial overlap**. None is clean
 greenfield, and two Lane A candidates were dropped.
@@ -60,7 +91,7 @@ Depth: F = full text, S = partial or snippets, A = abstract only. "Measured on" 
 |---|---|---|---|---|---|---|---|
 | A-p1 | Deployment feasibility of PQ signatures in C-V2X (arXiv 2608.05087) | arXiv only | F | **PC simulation** (OpenCV2X/Veins); sign and verify time excluded by design | Falcon-512 is the only PQ signature under the 2,481 B transport block; signer cost never measured | Move to device | → **A3** |
 | A-p2 | "Flying, Not Floating": fixed-point FN-DSA (ePrint 2026/2431) | ePrint only | A (PDF 403) | Cortex-M4 | ~45% fewer cycles than emulated double; RAM 59n→83n B; no M33 | Move to device | → **A3** |
-| A-p3 | PQ-CAN simulation framework (arXiv 2504.10730) | arXiv only | F (HTML) | **One PC**, Docker containers capped to ECU clock shares, classical CAN 2.0 | Per-message PQ signatures only; no CAN FD, no amortisation, no deadline metric | Account for whole system + crossover | → **A4** |
+| A-p3 | PQ-CAN simulation framework (arXiv 2504.10730) | arXiv only | F (PDF, 2026-11-10) | **One PC**, Docker containers capped to ECU clock shares, classical CAN 2.0 | Per-message PQ signatures only; no CAN FD, no amortisation, no deadline metric | Account for whole system + crossover | → **A4** |
 | A-p4 | Li & Micciancio, IND-CPA-D on CKKS (ePrint 2020/1533) | EUROCRYPT 2021 | A (PDF 403) | HE libraries on PC | Needs the full decrypted value to recover the key | Change threat model | → A1 (dropped) |
 | A-p5 | Federated unlearning in edge networks, survey (arXiv 2601.09978) | arXiv only | F (HTML) | none (survey) | Unlearning privacy risk described only in general terms | Change threat model | → A2 (dropped) |
 | A-p6 | When Machine Unlearning Jeopardizes Privacy (arXiv 2005.02205) | ACM CCS 2021 | F | Xeon server; tabular and image data, centralised | Before/after-deletion membership inference | Change data | → A2 (dropped) |
@@ -133,14 +164,62 @@ TESLA-anchor schemes with real signing code under emulation; produce latency-vs-
 (3) Add frame loss and a compromised-ECU forgery analysis. (4) Write up, centred on the N* table and the
 ranking-flip figure.
 **DRP phase 2:** Side-channel study of the PQ signer on the EFR32xG24 (Cortex-M33). The signing core is the
-same, so this transfers directly. ASSUMPTION: the EFR32xG24 has **no CAN FD controller** (VERIFY against the
-datasheet), so bus-level timing would stay simulated unless a CAN FD board is obtained. That is the DRP weakness of this card.
+same, so this transfers directly. KNOWN: the EFR32MG24 has **no CAN or CAN FD controller** (none in the datasheet's
+peripheral list; see *Target device*), so bus-level timing would stay simulated unless a CAN FD board is obtained. That is the DRP weakness of this card.
 **Group split:** PQ signer and Merkle/TESLA implementation / CAN FD timing simulator / MCU cost model /
 security analysis and writing.
 **Scores (1–5):** novelty **4** (amortised PQ stream authentication on CAN FD not found), threat-model clarity **5**
 (compromised SecOC-key holder is concrete), falsifiability **5**, feasibility **4** (simulation plus emulated
 signing; no hardware needed), DRP continuity **3** (signer SCA transfers; bus validation does not), group split
-**5**. **Total 26.**
+**5**. **Total 26.** *(Round 2 scores, superseded below.)*
+
+**Full-text update (2026-11-10). Reading depth: full text** for the A4 papers held locally: Applied Sciences
+16(8):3705 (all 40 pages), PQ-CAN (arXiv 2504.10730, PDF) and Batch Signatures Revisited (ePrint 2023/492, 11-page ePrint
+version). Notes: `papers/app16083705-pqc-canfd-design-space.md` (new), `papers/batch-signatures-revisited.md` (new),
+and a full-text addendum in `papers/pq-can-framework.md`. Collision re-check (15 queries, 11 sources):
+`collision-r3-A4-canfd-amortised-pq-auth.md`. The IETF MTL draft, SAE 2025-01-0451, ePrint 2026/1915 and LiBrA-CAN are
+**not** in `research/papers/`; they were checked from abstracts, snippets or landing pages only.
+- **app16083705 does not discuss batching, Merkle trees or amortised signatures (KNOWN, full text).** None of the
+  words batch, Merkle, tree, amortise, TESLA, chain or MTL occurs; "window" always means a scheduling window. The
+  "artifacts" are *one-off* transfers: a startup key exchange and one signed diagnostic response. They go over
+  ISO-TP at 1/5 Mbit/s with 40–80% background load, against a 50 ms completion deadline. The model is transport-only
+  (§6.5: no sign or verify compute), and the adversary is a passive HNDL recorder that "does not inject or modify
+  frames". It ranks FN-DSA-512 > ML-DSA-44 > SLH-DSA by *single-shot* size (Table 7b). Its future work is CAN XL /
+  CANsec, vehicle traces and a hardware bench, not amortisation. **Cite it as A4's transport baseline.**
+- **PQ-CAN correction (KNOWN, PDF Table II).** The "Falcon-512 overhead 47–167.5 ms" quoted above is mostly
+  per-run *key generation* (43–140 ms). Signing is 0.49–0.61 ms. Do not cite it as a signing or transport cost.
+- **Batch Signatures Revisited (KNOWN, full text).** Provides the Merkle batch construction (random batch id,
+  randomised leaves, the inner scheme signs id‖root‖N) with a BEUF-CMA proof. Per-message overhead is 82 B at N = 16 and 98 B at
+  N = 32 (Table 1). Its setting is TLS servers only (N ≤ 32 on a cloud server), with no embedded, CAN or deadline
+  model, and batches fill "when the signer is ready", not from a periodic source. The abstract's 3.2× Falcon gain
+  comes from the *FPU-emulation* row (Table 2). That matters for FPU-less ECUs.
+- **New neighbours from the re-check.**
+  - CAIBA (Wagner et al., arXiv 2504.16695, EuroS&P 2025): multicast *source authentication* on CAN against
+    masquerading compromised ECUs. A trusted authenticator overwrites tags on the fly, compatible with SecOC, with
+    "no communication overhead or verification delays". The mechanism is symmetric, so it is already quantum-safe.
+  - arXiv 2611.08108 (Sie, 5 Nov 2026): device-signed PQ Merkle roots over IoT records, costed in Ethereum gas,
+    not CAN.
+  - SAE 2025-01-0451 (Smith, Owens, Kozan, GVSETS 2025): per-message PQC on in-vehicle networks; no batching seen.
+  - ePrint 2026/1915 (Pornin): low-RAM Falcon-512, about 11 kB signing RAM and about 13.45 M cycles average on M4.
+  - LiBrA-CAN (Groza, Murvay, Van Herrewege, Verbauwhede; CANS 2012 and ACM TECS 16(3) 2017): classical, no PQ
+    follow-up found.
+- **Revised collision verdict:** **Partial overlap** (unchanged). Open as far as searched: amortised *PQ-signature*
+  source authentication of *periodic* CAN FD frame windows, with N* set jointly by an authentication deadline and a
+  bus-load cap, including Cortex-M signing and verification time, and the FN-DSA vs ML-DSA vs SLH-DSA ranking *under
+  amortisation*.
+- **Biggest remaining risk: motivation, not novelty.** CAIBA already gives source authentication against a
+  compromised ECU, symmetrically and with no delay. A4 must therefore argue why signatures are needed. The case is
+  no trusted authenticator node on the bus and no bus-level bit manipulation, which matters for ECUs from
+  different suppliers, gateways and CAN XL. Two further arguments: non-repudiation for forensic logs, and keys
+  that live as long as the vehicle. The ranking-flip conjecture is also weaker now: Pornin's low-RAM Falcon removes over half the
+  floating-point work, which narrows ML-DSA's "float-free" advantage.
+- **Kill experiment:** unchanged (half-day spreadsheet). Add CAIBA as a baseline column: if no N* beats CAIBA on
+  any axis other than "no trusted authenticator", the contribution reduces to that single argument.
+
+**Scores (1–5), after full-text check (2026-11-10):** novelty **4** (no amortised PQ work on CAN found; app16083705
+cleared), threat-model clarity **4** (was 5: CAIBA means the case for signatures must be argued), falsifiability **5**,
+feasibility **4**, DRP continuity **3** (no CAN FD controller on the EFR32MG24, now KNOWN; the signer's side channel
+still transfers), group split **5**. **Total 25** (was 26).
 
 ---
 
@@ -175,7 +254,8 @@ compromise is least bad.
 - KNOWN: the only Cortex-M33 source found is a wolfSSL vendor blog with no numbers.
 - CONJECTURE (the collision-checker's back-of-envelope): 13.45 M cycles at 78 MHz is ≈ 172 ms, i.e. ≈ 5.8
   signatures/s, already below 10 Hz *if* M4 cycles transfer to the M33 (uncalibrated estimate, assumes equal
-  cycles and that 78 MHz is the right clock; VERIFY the clock from the datasheet).
+  cycles. The 78 MHz clock is confirmed by datasheet Table 4.2, p. 24, but at 78 MHz the flash needs 1 wait state, so
+  M4 cycle counts measured at zero wait states may undercount on the M33).
 - ASSUMPTION: the M33 and M4 have similar pipelines and DSP multiply instructions, so cycle counts transfer within a
   small factor. This is to be checked, not assumed, in week 1.
 **Collision check:** **Partial overlap.** The per-variant M4 results are published. Open as far as searched is a
@@ -194,7 +274,7 @@ dead. The direction then shrinks to a benchmark note. One to two days.
 time) and verify cycles per variant (instruction-count estimate, calibrated against published M4 cycles from ePrint
 2026/1915 / 2026/2431 and pqm4). Peak RAM and stack (static analysis plus stack painting under emulation). Expanded vs
 non-expanded key. Signature and certificate bytes from arXiv 2608.05087. Energy per signature = cycles ×
-active current per MHz (estimate; EFR32xG24 datasheet, VERIFY).
+active current per MHz (estimate; 33.3–49.1 µA/MHz at 78 MHz and 3.0 V, datasheet Table 4.5, i.e. about 0.100–0.147 nJ/cycle).
 **Semester plan:** (1) harness plus kill experiment on reference Falcon. (2) Port or build the fixed-point,
 low-RAM and triple-word variants and measure all four with and without the expanded key. (3) Build the feasibility map
 (rate × RAM × verify load) and the conformance note. (4) Write up.
@@ -278,7 +358,8 @@ others are awake.
   (arXiv 2601.21966).
 - CONJECTURE: the healing-time scaling and that the policy ranking flips for IoT.
 - ASSUMPTION: an X25519 + AES-GCM MLS ciphersuite; published Thread/LoRaWAN duty cycles; 802.15.4 frame limits;
-  EFR32xG24 radio energy per byte (VERIFY).
+  EFR32MG24 radio energy per byte of about 0.50 µJ/B TX at 0 dBm (1.84 µJ/B at 10 dBm) and 0.55 µJ/B RX, derived from datasheet
+  Table 4.6 and the 250 kbps rate (see *Target device*).
 **Collision check:** **Partial overlap.** "Inactivity hurts PCS" is known. Open as far as searched: a
 wall-clock healing-time model as a function of Thread/LoRaWAN duty cycles; per-policy energy and airtime per node;
 and evidence that the best IoT policy differs from the messaging one. Must read before committing: the
@@ -292,7 +373,7 @@ no problem to solve and the direction is dead. Two days.
 **Measurements:** healing time distribution vs duty cycle and group size (simulation). Commit and update message
 bytes (exact, from an MLS implementation on PC). 802.15.4 fragments per commit. HPKE / X25519 / AES-GCM cycles per
 update on Cortex-M33 (instruction-count estimate, calibrated against published X25519 Cortex-M4 cycle counts). Energy
-per policy = cycles × active current + bytes × radio energy per byte (estimate; EFR32xG24 datasheet, VERIFY).
+per policy = cycles × active current + bytes × radio energy per byte (estimate; constants in *Target device*).
 **Semester plan:** (1) simulator plus kill experiment. (2) Implement the three policies, producing the healing-time vs
 duty-cycle curves. (3) Add the MCU cost model and produce the healing-time vs energy frontier. (4) Write up.
 **DRP phase 2:** The EFR32xG24 is a native Thread / 802.15.4 part, so run an MLS client on real sleepy Thread nodes
@@ -312,8 +393,9 @@ is heavy, so the semester uses simulation plus emulated primitives), DRP continu
 **Move used:** Move to the constrained device + find the crossover (vs a plain certificate).
 **Application:** An IoT device proves an attribute without becoming trackable, for example an e-bike or EV proving
 "valid charging subscription" to a charger, a wearable proving "authorised staff" at a clinic door, or a smart
-lock credential. The device's built-in secure element only supports ECDSA P-256; the Silicon Labs Secure Vault on
-the EFR32xG24 is such an element (VERIFY its exact capabilities).
+lock credential. The device's built-in secure element supports standard curves but no pairing-friendly curve. KNOWN: the
+EFR32MG24B310 has Secure Vault **High**, with ECDSA/ECDH on P-192/P-256/P-384/P-521, Ed25519 and Curve25519, and no BLS12-381
+(datasheet Table 3.1, p. 13). So the BBS part must run in software and only the binding key lives in the secure element.
 **Threat model:** Asset = the holder's unlinkability across presentations (chargers or doors cannot track the
 device), plus non-transferability (a thief who copies the MCU's flash cannot reuse the credential, because the
 device key never leaves the secure element). Adversary = colluding verifiers and issuer (honest-but-curious,
@@ -339,8 +421,9 @@ kilobytes, and whether the proof is small enough to send over a low-power radio.
 - KNOWN: the only known implementation is an Android wallet plus a Rust server.
 - KNOWN: pairing-free BBS variants targeting constrained secure elements exist (BBS#, ePrint 2025/619; ePrint 2026/555).
 - CONJECTURE: feasible on an M33 within seconds, and an energy crossover vs ECDSA certificates exists.
-- ASSUMPTION: a no-std BLS12-381 library can be built for Cortex-M; BLE/802.15.4 energy per byte from the EFR32xG24
-  datasheet (VERIFY).
+- ASSUMPTION: a no-std BLS12-381 library can be built for Cortex-M; BLE/802.15.4 energy per byte from the EFR32MG24
+  datasheet (802.15.4 values in *Target device*. BLE 1 Mbps TX current is the same CW row of Table 4.6, but per-byte energy at 1 Mbps
+  is 8 µs/B, i.e. 0.12 µJ/B at 0 dBm, derived).
 - DO NOT CITE: a TechRxiv review's claim of "BBS+ verification < 50 ms on Cortex-M4" was untraceable and implausible.
 **Collision check:** **Partial overlap.** The construction and phone-class numbers are published. Open as far as
 searched: holder-side presentation (including the ECDSA proof of possession) on a Cortex-M MCU with an ECDSA-only
@@ -353,7 +436,7 @@ published Cortex-M4 per-operation costs. If the estimate is above ~30 s or needs
 part has, the BBS route is dead on MCUs and the card pivots to the pairing-free variants. One day.
 **Measurements:** presentation cycles split into BLS12-381 G1, P-256 PoP and hashing (instruction-count estimate on
 QEMU M33; calibration source still to be found, since no verified M4 BLS12-381 benchmark is in hand yet). Peak RAM and
-stack. Secure-element ECDSA time (datasheet figure, VERIFY). Proof bytes per construction. Energy = compute +
+stack. Secure-element ECDSA P-256 sign 5.9 ms / verify 6.2 ms (datasheet Table 4.53, p. 92, SE Manager API). Proof bytes per construction. Energy = compute +
 radio bytes (estimate). The same metrics for an ECDSA certificate and a pairing-free BBS variant as baselines.
 **Semester plan:** (1) operation count plus kill experiment. (2) Build the holder side on emulated M33 with one
 BLS12-381 library, producing the cost breakdown. (3) Add the pairing-free variant and the ECDSA-cert baseline,
@@ -393,14 +476,15 @@ Round 1 scores are copied unchanged from `direction-mining-2026-11-05.md`. Both 
 
 | Rank | ID | Round / lane | Direction | Nov | TM | Fals | Feas | DRP | Split | **Total** | Collision verdict | Scope |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | D3 | R1 | HE-friendly cipher *client* cost + transciphering crossover on M33 | 4 | 4 | 5 | 5 | 5 | 5 | **28** | Open as far as searched | In scope (FHE) |
-| 2 | D2 | R1 | On-device cost of defeating gradient inversion on sensor FL | 4 | 5 | 5 | 4 | 4 | 5 | **27** | Partial overlap | In scope (FL) |
-| 3 | **A4** | R2 / A | Amortised PQ source authentication of CAN FD frame streams | 4 | 5 | 5 | 4 | 3 | 5 | **26** | Partial overlap | In scope (PQC) |
+| 1 | D3 | R1 | HE-friendly cipher *client* cost on M33 vs Xeon + transciphering crossover | 3 | 4 | 5 | 5 | 5 | 5 | **27** (was 28) | Partial overlap (was Open; SoK Table 4, HHE Kombat) | In scope (FHE) |
+| 2 | D2 | R1 | On-device cost of defeating gradient inversion on sensor FL | 3 | 5 | 5 | 4 | 4 | 5 | **26** (was 27) | Partial overlap (Sudars 2025, TS-Inverse Tab. IX) | In scope (FL) |
+| 3 | **A4** | R2 / A | Amortised PQ source authentication of CAN FD frame streams | 4 | 4 | 5 | 4 | 3 | 5 | **25** (was 26) | Partial overlap (CAIBA motivation risk) | In scope (PQC) |
 | 4 | **A3** | R2 / A | FN-DSA signing at 10 Hz on an M33-class V2X unit: rate × RAM × verify load | 3 | 4 | 4 | 4 | 5 | 4 | **24** | Partial overlap | In scope (PQC) |
 | 5 | D1 | R1 | PQ EDHOC compute-vs-radio energy + KEM crossover on M33/Thread | 3 | 4 | 5 | 4 | 4 | 4 | **24** | Partial overlap | In scope (PQC) |
 | 6 | **B3** | R2 / B | MLS/TreeKEM recovery time vs duty cycle in sleepy fleets | 4 | 4 | 4 | 3 | 4 | 4 | **23** | Partial overlap | **NEEDS INSTRUCTOR APPROVAL** |
 | 7 | **B4** | R2 / B | BBS anonymous credentials on M33 with secure-element ECDSA binding | 3 | 4 | 4 | 3 | 5 | 4 | **23** | Partial overlap | **NEEDS INSTRUCTOR APPROVAL** |
 
+**Re-scored 2026-11-10** after full-text checks of D3, D2 and A4 (see each card and `decision-summary.md`); the order is unchanged.
 A3 and D1 tie at 24 and also tie on novelty (3). A3 ranks above D1 on DRP continuity (5 vs 4).
 
 **Reading of the table:** round 2 found nothing that beats D3 or D2, but **A4 is a genuinely new in-scope option**.
@@ -483,16 +567,16 @@ All identities were verified by the reader agents against ePrint/arXiv/DOI landi
 
 ### 6.4 Not yet checked (read before committing to a round 2 direction)
 
-- **A4:** full text of Applied Sciences 16(8):3705 (403), which may discuss amortisation. Whether the EFR32xG24
-  has any CAN FD peripheral (assumed none). Re-check the PQ-CAN Table II numbers against the PDF.
+- **A4:** ~~full text of app16083705; CAN FD peripheral; PQ-CAN Table II~~ **done 2026-11-10** (no amortisation; no CAN
+  peripheral; Table II matches). Still to read in full: CAIBA (arXiv 2504.16695), arXiv 2611.08108, SAE 2025-01-0451, ePrint 2026/1915.
 - **A3:** full text of ePrint 2026/2431 and 2026/1915 (403; cycle and RAM figures). Whether NIST's FN-DSA draft
   specifies 64.64 fixed point (affects the conformance of the triple-word option). Any real M33 Falcon numbers.
 - **B3:** full Quarantined-TreeKEM PDF (403); Lebrun ANSSI thesis (Dec 2025); Group OSCORE / ACE group-rekeying
   drafts.
 - **B4:** full texts of ePrint 2025/1981 and 2026/965 (403; platform and op counts). A verified Cortex-M BLS12-381
   benchmark for calibration. Secure Vault's exact ECDSA capabilities.
-- **Carried over from round 1:** all EFR32xG24 datasheet electrical numbers (clock, RAM, active mA/MHz, radio TX)
-  are still unverified, and no energy estimate is valid until they are.
+- **Carried over from round 1:** ~~EFR32xG24 datasheet electrical numbers~~ done 2026-11-10 (see *Target device*). Still open:
+  confirm the kit part number from the UG524 user guide.
 
 ---
 

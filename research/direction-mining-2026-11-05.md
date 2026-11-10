@@ -10,9 +10,41 @@ Selection rule used this round: **top directions by score, overall** (families n
 > against <source>)". IDs were verified by the reader/collision agents; items still behind paywalls are
 > flagged in the verification log. "Open as far as searched" never means "proven open".
 
+## Target device: verified datasheet numbers (added 2026-11-10)
+
+**Part.** The EFR32xG24 Dev Kit (xG24-DK2601B, board BRD2601B) carries the **EFR32MG24B310F1536IM48-B**. Source caveat: the kit user guide (UG524) is *not* in `research/papers/` and its Silicon Labs URL returned HTTP 403. The part number therefore comes from the Zephyr board documentation for xg24_dk2601b, not from the user guide. Confirm it against UG524 (or the chip marking) once the guide is added. If the group's kit is a different board (e.g. a BRD4186C radio board), the row below changes.
+
+**Source.** *EFR32MG24 Wireless SoC Family Data Sheet*, Rev. 1.2 (local `research/papers/efr32mg24-datasheet.pdf`). Page numbers are the datasheet's own page numbers.
+
+| Quantity | Value for EFR32MG24B310F1536IM48-B | Datasheet row |
+|---|---|---|
+| Core | Cortex-M33 with DSP extensions, FPU, TrustZone | §1 Feature List (p. 2); block diagram (p. 1) |
+| Max CPU clock | **78 MHz** (needs VSCALE2 and 1 flash wait state, WS1; with 0 wait states the max is 40 MHz) | Table 4.2 General Operating Conditions, f_HCLK (p. 24) |
+| Flash / RAM | **1536 kB / 256 kB** | Table 2.1 Ordering Information (p. 3) |
+| Max TX power (this OPN) | **10 dBm** (the 19.5 dBm PA is only on the x20 OPNs) | Table 2.1 (p. 3) |
+| Secure Vault level | **High** | Table 2.1 (p. 3); feature list Table 3.1 (p. 13) |
+| Active current, EM0, DC-DC at 3.0 V, 78 MHz (HFRCO + DPLL, VSCALE2) | **33.3 µA/MHz** running Prime from flash; 32.8 µA/MHz while-loop; **49.1 µA/MHz** CoreMark | Table 4.5 (p. 29) |
+| Radio TX current, 2.4 GHz CW, DC-DC 3.0 V, VSCALE2 | **5.2 mA** at 0 dBm (0 dBm PA); **19.2 mA** at 10 dBm (10 dBm PA) | Table 4.6 I_TX (p. 33) |
+| Radio RX current, 802.15.4, DC-DC 3.0 V, VSCALE2 | **5.7 mA** receiving a frame; **5.6 mA** listening | Table 4.6 I_RX_ACTIVE (p. 32), I_RX_LISTEN (p. 33) |
+| 802.15.4 data rate | **250 kbps** O-QPSK DSSS | §1 Feature List (p. 2); 802.15.4 RX table is Table 4.20 (p. 55) |
+| Hardware crypto (SE Manager API) | ECDSA P-256 sign **5.9 ms**, verify **6.2 ms**; AES-128-CTR 1 kB **474 µs**; SHA-256 1 kB **308 µs** | Table 4.53 (p. 92–93) |
+| CAN / CAN FD controller | **none listed** (the word "CAN" as a bus peripheral does not appear in the datasheet) | §3 System Overview peripheral list; full-text search |
+
+**Derived constants. These are arithmetic from the rows above, not datasheet values (ASSUMPTION: 3.0 V supply, DC-DC, VSCALE2, typical values).**
+- Energy per CPU cycle = I/MHz × V = 33.3 µA/MHz × 3.0 V ≈ **0.100 nJ/cycle** (Prime) to **0.147 nJ/cycle** (CoreMark). Use the range, because crypto code sits between the two workloads.
+- Time on air per byte at 250 kbps = **32 µs**. TX energy per byte ≈ 5.2 mA × 3.0 V × 32 µs ≈ **0.50 µJ/B at 0 dBm** and **1.84 µJ/B at 10 dBm**. RX ≈ **0.55 µJ/B**. These exclude preamble/PHY header, MAC header, ACKs, CSMA back-off and radio wake-up, which are protocol-dependent and must be modelled separately.
+- So one transmitted payload byte costs as much energy as roughly **3,400–5,000 CPU cycles at 0 dBm** and **12,500–18,400 cycles at 10 dBm**. This ratio drives every compute-vs-radio crossover in these reports.
+- The TX current rows are continuous-wave measurements, not 802.15.4 packet measurements, and they were taken with the MCU in EM1 at 39 MHz (Table 4.6 header, p. 32). Treat them as radio-only adders. The phase-2 kit measurement replaces them.
+
 ---
 
 ## 1. Bottom line
+
+> **Update 2026-11-10 (full-text checks).** D3's verdict moves from *Open* to *Partial overlap*: the SoK's Table 4 and
+> HHE Kombat already rank HE-friendly ciphers by *client* cost, on Xeons. Its re-score is 27, and its kill experiment
+> has not run yet (harness ready). D2's re-score is 26 (Sudars et al. 2025 already tests DP against time-series gradient
+> inversion; the on-device cost against a learned attacker remains open). EFR32MG24 datasheet numbers are filled in
+> under *Target device*. Side-by-side comparison: `decision-summary.md`.
 
 Every one of the six candidates came back **Partial overlap** — the field is moving fast enough that no
 clean greenfield gap survived, but none was killed either; in each case the collision-checkers isolated a
@@ -43,14 +75,14 @@ Status: all IDs verified unless noted. "Measured on" is what the paper *actually
 | 3 | Enabling Quantum-Resistant EDHOC (IEEE Access 2025, 10.1109/ACCESS.2025.3554010) | Journal 2025 | S | nRF52840 M4, 6LoWPAN over **BLE** | PQ-EDHOC exists; no radio/CPU energy split | Whole-system | feeds D1 |
 | 4 | Low-Stack HAETAE for MCUs (arXiv 2604.15868 = ePrint 2026/635) | arXiv/ePrint 2026 | F | Real Cortex-M4 (Nucleo-L4R5) | stack crossover vs ML-DSA — **already done** | Move to device | → D5 (dropped) |
 | 5 | Realistic PQC eval for consumer IoT (IoT j. vol33 2025, 10.1016/j.iot.2025.101650) | Journal 2025 | A | Consumer IoT, BLE vs Wi-Fi | link dominates cost; per-interface suites | Whole-system | feeds D1 |
-| 6 | SoK: FHE-Friendly Ciphers & Transciphering (ePrint 2025/669) | TCHES 2025 i3 | S | **Server-side Xeon only** | cipher zoo; no client/embedded cost | Move to device | → **D3** |
+| 6 | SoK: FHE-Friendly Ciphers & Transciphering (ePrint 2025/669) | TCHES 2025 i3 | F (§5–6, local PDF, 2026-11-10) | **Server-side Xeon only** | cipher zoo; no client/embedded cost | Move to device | → **D3** |
 | 7 | Transistor: TFHE-friendly stream cipher (ePrint 2025/282) | CRYPTO 2025 | S | **Server-side CPU only** | cheap-client cipher, MCU cost unproven | Move to device | → **D3** |
 | 8 | Towards Lightweight CKKS: client cost (ePrint 2025/720) | ASIACCS 2026 | A | PC; keys still ~285 MB | direct CKKS client infeasible on MCU | Find crossover | → **D3** (motivation) |
 | 9 | HHEML: Hybrid HE PPML on Edge (arXiv 2510.20243) | arXiv 2025 | F | **PYNQ-Z2 FPGA SoC**, not an MCU | "edge" overstated; re-cost PASTA on M33 | Move to device | → **D3** |
 | 10 | MicroSecAgg (PoPETs 2024.3; ePrint 2022/714) | PETS 2024 | F | AWS EC2 (PC), ≤1024 users | classical SecAgg baseline; DH swap point | Swap primitive | → D4 (deprioritised) |
 | 11 | TS-Inverse: gradient inversion for FL time series (arXiv 2503.20952) | IEEE SaTML 2025 | F | PC/GPU; smart-meter/air-quality | low-dim inversion attack; no on-device/DP/SA | Change data + attack defence | → **D2** |
 | 12 | SoK: Gradient Inversion Attacks in FL (USENIX Sec 2025, Carletti) | USENIX 2025 | F | Literature only (no re-runs) | image-centric; low-dim & small-N SA open | Change data | → D2, D6 |
-| 13 | On-Device Training of Quantized DNNs on Cortex-M (arXiv 2407.10734) | IEEE TCAD 2024 | S | Real M0+/M4/M7 (no M33) | on-device gradients are real; cost anchor | Account for system | realism anchor for D2 |
+| 13 | On-Device Training of Quantized DNNs on Cortex-M (arXiv 2407.10734) | IEEE TCAD 2024 | F (v2 PDF, 2026-11-10) | Real M0+/M4/M7 (no M33) | on-device gradients are real; cost anchor | Account for system | realism anchor for D2 |
 | 14 | SecAgg++: PQ privacy-preserving FL (ePrint 2026/2497) | AISec 2026 | A | server/PC; no MCU | PQ secagg protocol exists; no MCU cost | Swap primitive | → D4 (deprioritised) |
 
 Papers surfaced by the reference-follow / collision hop (verified by the collision agents, not deep-read
@@ -110,7 +142,8 @@ server-side ordering with no crossover in sight, the headline claim is dead — 
 **Measurements:** per-cipher client cycles and peak stack (instruction-count estimate — to calibrate
 against SEAL-Embedded's published M4 numbers); flash/code size (static); uplink bytes = symmetric
 ciphertext size vs direct-HE ciphertext size; energy = cycles × active-current-per-MHz + TX-bytes ×
-radio-energy-per-byte (estimate — to calibrate against the EFR32xG24 datasheet, numbers VERIFY-before-use).
+radio-energy-per-byte (estimate; constants from the EFR32MG24 datasheet, see *Target device*: 0.100–0.147 nJ/cycle,
+0.50 µJ/B TX at 0 dBm or 1.84 µJ/B at 10 dBm, 250 kbps).
 Crossover = payload size where transciphering-energy = AEAD-baseline-energy.
 **Semester plan:** (1) harness + AEAD baseline + two ciphers, reproduce server ordering as a sanity check;
 (2) add the remaining HE-friendly families, produce the client-cost ranking table; (3) add the radio-energy
@@ -120,8 +153,39 @@ side-channel study of the symmetric client encryption (power/EM on the keystream
 (ePrint 2026/1485 studies SCA-protected PASTA), giving a clean phase-2 that matches the instructor's hint.
 **Group split:** cipher implementers (split the cipher zoo) / MCU cost-model & harness / direct-HE baseline
 & crossover analysis / evaluation & writing.
-**Scores (1–5):** novelty **4**, threat-model clarity **4**, falsifiability **5**, feasibility **5**,
+**Scores (1–5), round 1 (superseded):** novelty **4**, threat-model clarity **4**, falsifiability **5**, feasibility **5**,
 DRP continuity **5**, group split **5**.
+
+**Full-text update (2026-11-10).** The three papers that were 403-blocked are now read from local PDFs. The SoK
+(ePrint 2025/669) was read in full for §5–6. HHE Kombat (ePrint 2026/1314) was read in its client-side sections;
+see `papers/hhe-kombat.md`. PETCHA (ePrint 2026/112) was searched for client or embedded costs and has none.
+- **Claim (a) as worded is KNOWN, on a Xeon.** SoK Table 4 (p. 20) measures *client-side* cycles for 23 cipher
+  settings, and its §6(2) says outright that Rubato, the server-side winner, is slow on the client. HHE Kombat measures
+  184 client-side encryptions (Table 15 lists the winners) on an Intel Xeon Gold 6130. Neither runs on an MCU,
+  phone or embedded board. The round-1 note on the SoK wrongly said client cost was unmeasured; this is corrected in
+  `papers/sok-transciphering.md`.
+- **Revised collision verdict: Partial overlap** (was "Open as far as searched"). Open as far as searched:
+  (a′) the client ranking *on a Cortex-M33*, and whether it differs from the Xeon client ranking (32-bit core, no
+  AVX2 Keccak, software 64-bit modular reduction, 256 kB RAM). Also (b) the radio-inclusive crossover against an AEAD
+  for small sensor frames.
+- **Why (b) is more interesting than it looked (CONJECTURE, back-of-envelope).** One 802.15.4 byte at 0 dBm costs
+  about as much energy as 3,400–5,000 CPU cycles (see *Target device*). On the Xeon, Pasta-4 already spends about
+  3.6×10³ cycles per byte (SoK Table 4), and FiLIP-DSM about 1.6×10⁶. So on an MCU the keystream compute for several
+  HE-friendly ciphers plausibly costs *more* energy than transmitting the bytes, inverting the usual "radio
+  dominates" intuition. The EFR32MG24's hardware AES (AES-128-CTR, 1 kB in 474 µs, Table 4.53) makes the AEAD
+  baseline even cheaper.
+- **Kill experiment status: NOT RUN.** A Cortex-M33 instruction-count harness is written in
+  `experiments/d3-transciphering-client/mcu/`. It has a QEMU `mps2-an505` TCG plugin that counts instructions between markers,
+  stack painting, a malloc high-water wrapper, and known-answer-test checks. It covers 14 of the SoK's Table 4 cipher
+  settings via the IAIK hybrid-HE-framework, plus tiny-AES-c and Ascon. Running it was blocked because compiling and
+  executing the downloaded third-party reference code needs the user's approval. **No M33 ranking exists yet**, so
+  there is no comparison with the SoK's Xeon ranking to report.
+- **Biggest remaining risk:** the M33 ranking may simply match the Xeon ranking (same reference code, same
+  PRNG-dominated cost structure). Then (a′) is dead and D3 rests on the crossover (b) alone.
+
+**Scores (1–5), after full-text check (2026-11-10):** novelty **3** (client ranking now KNOWN on a Xeon; only the MCU
+ranking and the radio crossover remain), threat-model clarity **4**, falsifiability **5**, feasibility **5**, DRP
+continuity **5**, group split **5**. **Total 27** (was 28). Re-score once the kill experiment has run.
 
 ---
 
@@ -177,8 +241,54 @@ compose with a secure-aggregation layer (links to D4) to test leakage under aggr
 continuity is weaker here than for D3 (this is an ML-privacy study, not a crypto primitive).
 **Group split:** attack reproduction / defence + DP calibration / FL training harness & datasets /
 on-device cost model & evaluation.
-**Scores (1–5):** novelty **4**, threat-model clarity **5**, falsifiability **5**, feasibility **4**,
+**Scores (1–5), round 1 (superseded):** novelty **4**, threat-model clarity **5**, falsifiability **5**, feasibility **4**,
 DRP continuity **4**, group split **5**.
+
+**Full-text update (2026-11-10). Reading depth: full text** for all D2 papers held locally: MDPI MAKE 8(10):320,
+TS-Inverse (arXiv 2503.20952), the GIA SoK (USENIX Sec 2025) and Deutel et al. (arXiv 2407.10734 v2). Notes:
+`papers/make8100320-ondevice-not-private.md` (new) and full-text addenda in `papers/ts-inverse.md`,
+`papers/sok-gradient-inversion.md` and `papers/ondevice-training-cortexm.md`. Collision re-check (13 queries):
+`collision-r3-D2-sensor-gradinv-defence-cost.md`. VAHANA (ePrint 2026/1936) and arXiv 2609.02971 are **not** in
+`research/papers/` and were checked from abstracts only.
+- **make8100320 is not a collision (KNOWN, full text).** It studies membership inference only, with centralised
+  training on a PC, multivariate anomaly-detection windows (TSB-AD-M, 64 steps), clipping C=1 plus σ=1 noise with no
+  ε accounting (attack AUC 0.688→0.508 at about 0.05 detection-AUC cost, Table 4), and costs on a desktop Ryzen
+  5 5500GT. It has no FL, no reconstruction and no MCU. Its future work (on-MCU memory/energy, formal DP) makes the
+  same group a possible competitor on the *cost* half of D2.
+- **TS-Inverse already answers part of the old kill experiment (KNOWN).** Reconstruction still works at batch
+  B = 4 (Figs 9–10), though only under single-step FedSGD. Its "gauss" defence (no σ or ε stated, Table IX) stops
+  the optimisation attacks, but the *learned* LTI attack still reaches sMAPE about 0.22.
+- **New nearest neighbour (KNOWN, abstract only):** Sudars, Namatēvs, Nikulins, Ozols, "Privacy Auditing of Lithium-Ion
+  Battery Ageing Model by Recovering Time-Series Data Using Gradient Inversion Attack in Federated Learning",
+  Applied Sciences 15(10):5704, 2025. It runs gradient inversion on battery time series with DP noise and finds the
+  reconstruction error plateaus at a level set by the privacy budget. No device cost is mentioned. So "does DP stop
+  reconstruction on time series" is no longer open; the *on-device cost* of the DP setting that does it is.
+- Other neighbours, from abstracts or HTML: SVDefense (arXiv 2510.03319: HAR data, Raspberry Pi / Jetson latency
+  only), VAHANA (ePrint 2026/1936: noise-defence cost on a RISC-V softcore, images) and EPC-TinyAD (Electronics
+  15:2879: no attack, no ε, no hardware cost). Unresolved: a ResearchGate item claiming DP tests on a Cortex-M7
+  (ID 390947565) could not be verified.
+- **Revised collision verdict:** **Partial overlap.** Open as far as searched is the *per-training-step cost on a
+  Cortex-M33* (cycles, RAM, energy) of the clipping + noise setting at an *accounted ε* (or the sparsification
+  level) that keeps reconstruction of low-dimensional smart-meter / air-quality windows above a usefulness
+  threshold *against a learned, defence-aware attacker (LTI-style), not only optimisation attacks*, together with the
+  accuracy it costs. No paper found measures DP or sparsification cost per step on any Cortex-M part.
+- **Revised claim (falsifiable):** the ε needed to stop a learned attacker on these windows costs either (a) more
+  forecast accuracy than a stated threshold (a few % sMAPE), or (b) a per-step overhead on the M33 that is not
+  small next to the training step itself. The calibration anchor is CWRU 1×512 transfer learning on an M4: 75.79 ms
+  and 2.18 mJ per sample (Deutel et al., Fig. 5). If both (a) and (b) are small, a cheap defence suffices, which is
+  still a publishable result once quantified.
+- **Revised kill experiment (week 1):** reproduce TS-Inverse and LTI on Electricity-370 / London smart-meter at
+  B = 4 with multi-step FedAvg (5 local steps), then add DP-SGD at ε ∈ {1, 8} with an accountant. If the learned
+  attacker is already defeated at ε = 8 *and* accuracy loss is below 1% sMAPE, the trade-off is trivial and the
+  direction shrinks to a measurement note.
+- **Biggest remaining risk:** the cost half may be thin. Clipping plus Gaussian noise is O(model size) per step and
+  may be negligible next to backpropagation. To guard against this, also cost the RNG (a CSPRNG for Gaussian draws on the M33) and RAM for
+  per-example clipping, which is where an MCU is plausibly expensive (CONJECTURE).
+
+**Scores (1–5), after full-text check (2026-11-10):** novelty **3** (Sudars 2025 and TS-Inverse Table IX take the
+"DP vs time-series reconstruction" part; on-device cost against a learned attacker remains), threat-model clarity
+**5**, falsifiability **5**, feasibility **4** (needs GPU time to train LTI per ε, but no hardware), DRP continuity
+**4**, group split **5**. **Total 26** (was 27).
 
 ---
 
@@ -206,8 +316,9 @@ energy split in millijoules* and the *crossover*, which no single paper gives.
 compute-vs-comms energy split on **BLE/nRF52840**; arXiv 2610.13026 asserts it for **Thread** but is
 simulation-only (Matter CASE, no millijoules, no split); arXiv 2607.23007 has M33 energy over **NB-IoT**;
 Future Internet 18(6):316 shows fragmentation but on PC/LoRa. CONJECTURE — the >5× factor and the KEM
-crossover on M33/Thread/EDHOC specifically. ASSUMPTION — EFR32xG24 radio-energy-per-byte and MCU
-active-current from the datasheet (VERIFY), a 6LoWPAN MTU and a retransmission model.
+crossover on M33/Thread/EDHOC specifically. KNOWN (datasheet, *Target device*) — MCU active current 33.3–49.1 µA/MHz at 78 MHz
+(Table 4.5), radio TX 5.2 mA at 0 dBm / 19.2 mA at 10 dBm (Table 4.6), 250 kbps 802.15.4. ASSUMPTION — a 6LoWPAN MTU and a
+retransmission model.
 **Collision check:** **Partial overlap** — the phenomenon is published, but the measured M33 + 802.15.4/
 Thread + EDHOC/DTLS millijoule energy split *and the compact-KEM total-energy crossover* are open as far as
 searched (log: `collision-cand1-pqc-handshake-energy.md`). Reposition the contribution onto the crossover
@@ -218,8 +329,8 @@ back-of-envelope compute-energy vs radio-energy ratio for one handshake. If comp
 the ratio is near 1, the premise is wrong before any code is written — half a day.
 **Measurements:** lattice compute energy = handshake cycles × active-current-per-MHz (estimate — calibrate
 against SLOTHY/pqm4 M-class cycles, re-cost to M33 via `mcu-cost-estimator`); radio energy = (handshake
-bytes + fragmentation overhead + retransmissions) × TX-energy-per-byte (estimate — calibrate against
-EFR32xG24 datasheet, VERIFY); totals and the crossover vs a compact-ciphertext KEM.
+bytes + fragmentation overhead + retransmissions) × TX-energy-per-byte (estimate — TX 0.50 µJ/B at 0 dBm or 1.84 µJ/B at 10 dBm,
+derived from datasheet Table 4.6 and the 250 kbps rate); totals and the crossover vs a compact-ciphertext KEM.
 **Semester plan:** (1) the envelope kill-check + message-size/fragmentation model for Thread; (2) emulate
 ML-KEM-512 on QEMU M33 for cycle→energy, assemble the compute-vs-radio split; (3) add a compact-ciphertext
 KEM and locate the crossover; (4) write up with the millijoule breakdown figure.
@@ -310,8 +421,8 @@ verbatim lists in `research/collision-cand1..6-*.md`.
   them or finalising D3/D4 novelty.
 - The "~80% energy" PQ-EDHOC figure: confirm from the IEEE Access / Zenodo PDF body.
 - D1 baselines arXiv 2602.18708 and 2610.13026: deep-read to state precisely what energy split each gives.
-- All EFR32xG24 datasheet electrical numbers (clock, RAM, active mA/MHz, radio TX mA): VERIFY from the
-  official datasheet before any energy estimate — none are currently in hand.
+- ~~All EFR32xG24 datasheet electrical numbers~~ **Done 2026-11-10:** filled from the EFR32MG24 datasheet Rev. 1.2
+  (see *Target device*). Still open: the kit part number must be confirmed from the UG524 user guide, which is not in hand.
 
 ---
 

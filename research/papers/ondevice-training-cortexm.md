@@ -60,3 +60,13 @@ Can we reuse a per-step cost to budget a DP/defence overhead? PARTIALLY, and onl
 
 ## Reading depth
 Skimmed-to-full on the arXiv v1 HTML: abstract, platform/table II, FQT scheme, results text, conclusion read directly via fetch; exact figure values (Figs 4/5/7) were read as plotted ranges, not transcribed from tables. Final TCAD PDF not opened — recommend pulling precise per-step numbers from it before any experiment uses them.
+
+## Full-text check (2026-11-10, local PDF `2407.10734v2.pdf`, v2, 12 pages)
+Reading depth is now **full text (v2)**. Corrections and additions:
+- **Abstract numbers confirmed in v2.** Versus related work: 34.8% less memory, 49.0% lower latency per training sample, and up to 8.7× speedup from dynamic partial updates (abstract, p. 1). The "could not be confirmed" caveat above applied to v1 only.
+- **Time-series anchors (Fig. 5, p. 8; transfer learning; mean of 1000 steps; idle draw excluded):**
+  - CWRU (1×512 series, Table I), uint8: M0+ 166.65 ms / 0.59 mJ; **M4 (nRF52840, 64 MHz) 75.79 ms / 2.18 mJ**; M7 3.57 ms / 0.08 mJ per sample.
+  - Daliac (1×1024), uint8: M4 379.91 ms / 11.12 mJ per sample.
+  - The "~50–70 mJ/sample on M7" above does **not** match Fig. 5, where the M7 is below 3 mJ for both time-series sets. Treat that figure as unverified (possibly a vision dataset from Fig. 4) and do not cite it.
+- Table II (p. 7): RP2040 M0+ 133 MHz; nRF52840 M4 64 MHz, 256 KB RAM; i.MX RT1062 M7 600 MHz. Still **no Cortex-M33**, and no privacy, FL or DP experiment. Privacy appears only as motivation (p. 1).
+- For D2, the CWRU/M4 row is the per-step baseline that a defence's added cost should be compared against (ASSUMPTION: M33 at 78 MHz is within a small factor of M4 at 64 MHz).

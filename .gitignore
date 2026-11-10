@@ -1,0 +1,6 @@
+# Paper PDFs and datasheets stay local (copyright); notes in research/papers/*.md are committed.
+*.pdf
+
+# D3 MCU harness: fetched third-party sources and build outputs
+experiments/*/mcu/deps/
+experiments/*/mcu/build/
