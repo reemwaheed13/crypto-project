@@ -11,7 +11,7 @@ modelling choice. "Open" always means *open as far as searched*, never proven op
   A sensor scrambles its readings with a special "HE-friendly" cipher so that the cloud can later turn them into
   homomorphically encrypted data and compute on them without seeing them. We measure what each cipher costs the
   *sensor*, on a Cortex-M33 like the one on our dev kit.
-- **D2: What does it cost a sensor to stop the federated-learning server from rebuilding its data?**
+- **D2: What does private federated learning cost a sensor? DP, secure aggregation, and gradient inversion on a Cortex-M33.** *(Retitled 2026-11-11; it was "What does it cost a sensor to stop the federated-learning server from rebuilding its data?")*
   Smart meters train a shared forecasting model and upload model updates. A curious server can partly rebuild a
   household's load curve from one update. Adding noise stops this, but costs accuracy and battery. We measure how
   much noise is enough, and what it costs on the chip.
@@ -72,6 +72,17 @@ that less certain.
 > - **N1 kill test (2026-11-11, `n1-kill-2026-11-11.md`):** the float32 pair-inversion break does not survive D2's 5-step
 >   FedAvg upload. The attack falls to the ideal-Gaussian bound; it still breaks single-step releases (96%). N1 drops
 >   to **24**, and D2 is re-scored **26** without credit for an N1 break.
+>
+> - **D2 crypto add-on (2026-11-11, `d2-crypto-addon-2026-11-11.md`).**
+>   - Secure aggregation joins the threat model as a costed work package on top of DP. The SecAgg+DP-on-MCU check is a
+>     partial overlap: no masking SecAgg client has been measured on a microcontroller, and the closest is a
+>     Raspberry Pi 4 without DP.
+>   - Estimate per round: SecAgg+ masking plus X25519 costs 0.4–0.7× the DP round at N = 10–100. Full pairwise costs up
+>     to 4.7× at N = 100. The 43 mJ radio upload dominates.
+>   - Switching to the constant-time integer noise that SecAgg needs costs up to 12–37× the DP step with a naive constant-time CDT (MEASURED upper bound; σ-independent samplers are unmeasured).
+>   - Of seven applied-crypto candidates, none is Open, so no standalone crypto contribution is claimed.
+>   - D2 stays at **26**: the SecAgg package adds scope (split 5), but the novelty is still the measured cost, not a new
+>     primitive.
 >
 > **Recommendation: commit to D2, with N1's sound-noise-sampler work as one of its four work packages** (now framed as
 > hardening plus a side-channel target, not a break of D2's noise). In plain words,

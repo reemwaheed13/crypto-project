@@ -1,0 +1,23 @@
+DP-SGD per round (5 steps): 28.1 M instr = 2.81-8.28 mJ  [MEASURED instr x ASSUMPTION/KNOWN energy]
+
+### Update quantised to 32-bit integers: 66,432 B, 652 frames, radio upload 43.3 mJ [KNOWN-derived]
+One mask expansion: ChaCha20 SW 1.32 M instr (17.0-33.9 ms, 0.132-0.389 mJ) [ESTIMATE]; AES-CTR on SE 30.8 ms, 0.240-0.353 mJ [KNOWN time, ASSUMPTION power]
+| N | scheme | masks/round | mask compute (M instr) | mask energy mJ | x DP round | key agreements | X25519 mJ | radio upload mJ |
+|---|---|---|---|---|---|---|---|---|
+| 10 | full pairwise (Bonawitz) | 10 | 13.2 | 1.32-3.89 | 0.47 | 20 X25519 | 0.82-1.21 (8.2 M cyc) | 43.3 |
+| 10 | SecAgg+ (k=2log2N) | 8 | 10.6 | 1.06-3.11 | 0.38 | 16 X25519 | 0.66-0.97 (6.6 M cyc) | 43.3 |
+| 40 | full pairwise (Bonawitz) | 40 | 52.9 | 5.29-15.55 | 1.88 | 80 X25519 | 3.29-4.83 (32.9 M cyc) | 43.3 |
+| 40 | SecAgg+ (k=2log2N) | 12 | 15.9 | 1.59-4.67 | 0.56 | 24 X25519 | 0.99-1.45 (9.9 M cyc) | 43.3 |
+| 100 | full pairwise (Bonawitz) | 100 | 132.2 | 13.22-38.88 | 4.70 | 200 X25519 | 8.22-12.09 (82.2 M cyc) | 43.3 |
+| 100 | SecAgg+ (k=2log2N) | 15 | 19.8 | 1.98-5.83 | 0.70 | 30 X25519 | 1.23-1.81 (12.3 M cyc) | 43.3 |
+
+### Update quantised to 16-bit integers: 33,216 B, 326 frames, radio upload 21.7 mJ [KNOWN-derived]
+One mask expansion: ChaCha20 SW 0.69 M instr (8.8-17.6 ms, 0.069-0.202 mJ) [ESTIMATE]; AES-CTR on SE 15.4 ms, 0.120-0.177 mJ [KNOWN time, ASSUMPTION power]
+| N | scheme | masks/round | mask compute (M instr) | mask energy mJ | x DP round | key agreements | X25519 mJ | radio upload mJ |
+|---|---|---|---|---|---|---|---|---|
+| 10 | full pairwise (Bonawitz) | 10 | 6.9 | 0.69-2.02 | 0.24 | 20 X25519 | 0.82-1.21 (8.2 M cyc) | 21.7 |
+| 10 | SecAgg+ (k=2log2N) | 8 | 5.5 | 0.55-1.61 | 0.19 | 16 X25519 | 0.66-0.97 (6.6 M cyc) | 21.7 |
+| 40 | full pairwise (Bonawitz) | 40 | 27.4 | 2.74-8.07 | 0.97 | 80 X25519 | 3.29-4.83 (32.9 M cyc) | 21.7 |
+| 40 | SecAgg+ (k=2log2N) | 12 | 8.2 | 0.82-2.42 | 0.29 | 24 X25519 | 0.99-1.45 (9.9 M cyc) | 21.7 |
+| 100 | full pairwise (Bonawitz) | 100 | 68.6 | 6.86-20.17 | 2.44 | 200 X25519 | 8.22-12.09 (82.2 M cyc) | 21.7 |
+| 100 | SecAgg+ (k=2log2N) | 15 | 10.3 | 1.03-3.03 | 0.37 | 30 X25519 | 1.23-1.81 (12.3 M cyc) | 21.7 |

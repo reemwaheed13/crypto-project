@@ -195,7 +195,39 @@ continuity **5**, group split **5**. **Total 27** (was 28). Re-score once the ki
 
 ---
 
-### D2 — What does it actually cost a sensor node to defeat gradient-inversion reconstruction?
+### D2 — What does private federated learning cost a sensor? DP, secure aggregation, and gradient inversion on a Cortex-M33
+
+*(Retitled 2026-11-11; original title: "What does it actually cost a sensor node to defeat gradient-inversion
+reconstruction?")*
+
+> **Crypto add-on (2026-11-11, `d2-crypto-addon-2026-11-11.md`).**
+>
+> **Threat model, extended.**
+> - The honest-but-curious server now also faces **secure aggregation (SecAgg)**: pairwise X25519 key agreement,
+>   ChaCha20 mask expansion, and Shamir-shared seeds for dropouts (Bonawitz et al.; SecAgg+ with about 2 log₂N
+>   neighbours), so it sees only the sum.
+> - DP still covers what the sum reveals, plus servers that exploit dropouts or collude.
+> - SecAgg is costed on top of DP, not compared against it.
+>
+> **Gap (open as far as searched):** the measured per-round cost to a Cortex-M sensor of DP-SGD *and* secure aggregation
+> together (compute, RAM, 802.15.4 frames, energy), and how it scales with N. Prior SecAgg costs are on servers or a
+> Raspberry Pi 4, without DP (`collision-r4-secagg-dp-mcu-cost.md`, partial overlap).
+>
+> **Estimate** (MEASURED instruction counts × ASSUMPTION/KNOWN energy):
+> - **SecAgg+:** masking plus X25519 (411,061 cycles on the M33, ePrint 2025/523 abstract) costs about 0.4–0.7× the
+>   DP-SGD round at N = 10–100.
+> - **Full pairwise SecAgg:** 0.5×, 1.9× and 4.7× at N = 10, 40 and 100.
+> - **Radio:** the 43 mJ upload (32-bit) still dominates.
+> - **Integer noise:** the *switch to constant-time integer DP noise* that SecAgg requires costs up to **12–37× the DP step** with
+>   a naive constant-time CDT (MEASURED, N = 10–100). This is an upper bound: σ-independent samplers (FACCT,
+>   Micciancio–Walter) are unmeasured. It is plausibly the largest crypto line item.
+>
+> **Applied-crypto contribution:** seven candidates were checked (mask PRG choice, modulus/frames, constant-time Shamir,
+> seed KDF lifecycle, accelerator-fed noise, streaming masking, distributed constant-time sampler). **None is Open**
+> (five partial overlaps, one of them also failing our measurement; the one literature-Open candidate fails on substance), so none is claimed.
+>
+> **Phase 2 is unchanged:** power analysis of the PRNG and noise routine on the EFR32 kit.
+
 
 **Move used:** Change the data (image → low-dimensional sensor time series) + attack the defence.
 **Application:** A fleet of smart meters / air-quality nodes trains a shared forecasting model by federated
