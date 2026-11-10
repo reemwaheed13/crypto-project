@@ -1,0 +1,33 @@
+households with complete 2014 data: 340; using 60
+windows per client (train): 1209; test: 237
+eps=inf sigma=0.0000 FL test sMAPE=0.3918 (45s)
+  optimisation attack done (326s)
+  LTI sigma=0.000 it 0 loss 0.0696
+  LTI sigma=0.000 it 500 loss 0.0155
+  LTI sigma=0.000 it 1000 loss 0.0143
+  LTI sigma=0.000 it 1500 loss 0.0133
+  LTI sigma=0.000 it 2000 loss 0.0122
+  LTI sigma=0.000 it 2500 loss 0.0130
+  LTI done (2499s)
+{"eps": Infinity, "sigma": 0.0, "fl_test_smape": 0.39175764136016367, "opt": {"obs_mean": 0.28599097300320864, "obs_sd": 0.1328962212400918, "tar_mean": 0.2872154572978616, "tar_sd": 0.14613876914655577}, "lti": {"obs_mean": 0.24780339701101184, "obs_sd": 0.10902207157502115, "tar_mean": 0.2463844739831984, "tar_sd": 0.10931377287678985}, "prior": {"obs_mean": 0.4484876487404108, "obs_sd": 0.1716875627761533, "tar_mean": 0.4539777524769306, "tar_sd": 0.17542119721192428}}
+eps=8.0 sigma=0.4509 FL test sMAPE=0.4049 (60s)
+  optimisation attack done (361s)
+  LTI sigma=0.451 it 0 loss 0.0452
+  LTI sigma=0.451 it 500 loss 0.0276
+  LTI sigma=0.451 it 1000 loss 0.0281
+  LTI sigma=0.451 it 1500 loss 0.0270
+  LTI sigma=0.451 it 2000 loss 0.0274
+  LTI sigma=0.451 it 2500 loss 0.0261
+  LTI done (2918s)
+{"eps": 8.0, "sigma": 0.450897216796875, "fl_test_smape": 0.4049162033945322, "opt": {"obs_mean": 1.4158824309706688, "obs_sd": 0.11888823592034105, "tar_mean": 0.9947078786790371, "tar_sd": 0.14698366372587282}, "lti": {"obs_mean": 0.38211262691766024, "obs_sd": 0.1436347127004899, "tar_mean": 0.37672346364706755, "tar_sd": 0.14617863408319243}, "prior": {"obs_mean": 0.4484876487404108, "obs_sd": 0.1716875627761533, "tar_mean": 0.4539777524769306, "tar_sd": 0.17542119721192428}}
+eps=1.0 sigma=0.7983 FL test sMAPE=0.4460 (73s)
+  optimisation attack done (678s)
+  LTI sigma=0.798 it 0 loss 0.0451
+  LTI sigma=0.798 it 500 loss 0.0292
+  LTI sigma=0.798 it 1000 loss 0.0297
+  LTI sigma=0.798 it 1500 loss 0.0295
+  LTI sigma=0.798 it 2000 loss 0.0300
+  LTI sigma=0.798 it 2500 loss 0.0288
+  LTI done (3555s)
+{"eps": 1.0, "sigma": 0.79833984375, "fl_test_smape": 0.44601668789982796, "opt": {"obs_mean": 1.4135878905653954, "obs_sd": 0.12151223095207402, "tar_mean": 1.1485959216952324, "tar_sd": 0.11937192624649455}, "lti": {"obs_mean": 0.4148168545216322, "obs_sd": 0.15175682817137537, "tar_mean": 0.41255174949765205, "tar_sd": 0.15145107125432386}, "prior": {"obs_mean": 0.4484876487404108, "obs_sd": 0.1716875627761533, "tar_mean": 0.4539777524769306, "tar_sd": 0.17542119721192428}}
+DONE

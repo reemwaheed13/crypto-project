@@ -1,0 +1,16 @@
+KAT chacha20 ok 1 params 16608
+WIN plain rep 0 stack 1496
+WIN dp rep 0 stack 1496
+WIN noise rep 0 stack 256
+WIN clip rep 0 stack 256
+WIN plain rep 1 stack 1496
+WIN dp rep 1 stack 1496
+WIN noise rep 1 stack 256
+WIN clip rep 1 stack 256
+WIN plain rep 2 stack 1496
+WIN dp rep 2 stack 1496
+WIN noise rep 2 stack 256
+WIN clip rep 2 stack 256
+CHECK w0 -70645
+DONE fails 0
+exit=0

@@ -4,3 +4,8 @@
 # D3 MCU harness: fetched third-party sources and build outputs
 experiments/*/mcu/deps/
 experiments/*/mcu/build/
+
+# Build outputs of the other experiment folders (QEMU ELFs, plugin .so, raw logs)
+experiments/*/build/
+experiments/*/build_*/
+experiments/*/mcu/build/

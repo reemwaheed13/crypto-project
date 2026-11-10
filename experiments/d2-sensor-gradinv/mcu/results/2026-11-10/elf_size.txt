@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+  17924	    108	4194196	4212228	 404604	/mnt/c/Users/user/Desktop/crypto-research-kit/experiments/d2-sensor-gradinv/build/dpstep.elf
